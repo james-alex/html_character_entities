@@ -1,0 +1,14 @@
+name: html_character_entities
+description: >-
+  A Dart utility class containing a map of key/value pairs for every
+  HTML 4.01 character entity, including ASCII codes, and a method to
+  parse strings for those character entities.
+version: 0.0.1
+author: James Alexander <j.alex@email.com>
+homepage: https://github.com/james-alex/html_character_entities
+
+environment:
+  sdk: ">=2.0.0 <3.0.0"
+
+dev_dependencies:
+  test: ^1.6.5
