@@ -10,7 +10,7 @@ class HtmlCharacterEntities {
 
     int charCodeIndex = 0;
 
-    RegExpMatch findNextCharCode() {
+    Match findNextCharCode() {
       final Iterable<Match> charCodes = RegExp(r'&(#?)([a-zA-Z0-9]+?);').allMatches(string);
 
       if (charCodes.length <= charCodeIndex) return null;
@@ -18,7 +18,7 @@ class HtmlCharacterEntities {
       return charCodes.elementAt(charCodeIndex);
     }
 
-    RegExpMatch nextCharCode = findNextCharCode();
+    Match nextCharCode = findNextCharCode();
 
     while (nextCharCode != null) {
       final String charCode = string.substring(nextCharCode.start, nextCharCode.end);

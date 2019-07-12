@@ -3,7 +3,7 @@ description: >-
   A Dart utility class containing a map of key/value pairs for every
   HTML 4.01 character entity, including ASCII codes, and a method to
   parse strings for those character entities.
-version: 0.0.2
+version: 0.0.3
 author: James Alexander <j.alex@email.com>
 homepage: https://github.com/james-alex/html_character_entities
 
