@@ -1,5 +1,8 @@
 library html_character_entities;
 
+/// A utility class containing a map, [characters], of key/value pairs for
+/// every HTML 4.01 character entity, including ASCII codes, and a method,
+/// [parse], to parse strings for those character entities.
 class HtmlCharacterEntities {
   /// Parses a [string] and replaces all valid HTML character entities with their respective characters.
   static String parse(String string) {
