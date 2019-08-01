@@ -23,7 +23,7 @@ print(HtmlCharacterEntities.decode(string)); // An ampersand can be written as &
 
 ## Encoding Strings
 
-The `encode()` method has an argument, [characters] that accepts a string
+The `encode()` method has an argument, [characters], that accepts a string
 of all characters that should be encoded. It defaults to the 5 reserved
 characters in both HTML and XML: less-than (`<`), greater-than (`>`),
 ampersand (`&`), apostrophe or single quote (`'`), and double-quote (`"`).
