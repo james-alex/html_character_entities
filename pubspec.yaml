@@ -3,7 +3,7 @@ description: >-
   A utility class containing maps of key/value pairs for every
   HTML 4.01 character entity, including ASCII codes, and methods to
   encode and decode strings to and from those character entities.
-version: 0.1.0
+version: 0.1.0+1
 author: James Alexander <j.alex@email.com>
 homepage: https://github.com/james-alex/html_character_entities
 
