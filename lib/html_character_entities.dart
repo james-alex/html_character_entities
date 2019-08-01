@@ -101,7 +101,7 @@ class HtmlCharacterEntities {
     for (int i = 0; i < encodingMapCharacters.length; i++) {
       final String character = encodingMapCharacters[i];
 
-      while (encodedCharacters.indexOf(character) != -1) {
+      while (encodedCharacters.contains(character)) {
         encodedCharacters[encodedCharacters.indexOf(character)] =
             encodingMap[character];
       }
