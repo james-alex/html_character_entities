@@ -55,7 +55,7 @@ print(string); // There are 4 suites of cards: ♠ Spades, ♣ Clubs, ♥ Hearts
 ```
 
 Maps containing the characters with their respective character codes
-as values can be accessed. They are used by the `encode` method.
+as values can also be referenced. They are used by the `encode` method.
 
 ```dart
 // A map with only ASCII code character entities as values.
