@@ -4,14 +4,17 @@ library html_character_entities;
 /// every HTML 4.01 character entity, including ASCII codes, and a method,
 /// [parse], to parse strings for those character entities.
 class HtmlCharacterEntities {
+  HtmlCharacterEntities._();
+
   /// Parses a [string] and replaces all valid HTML character entities with their respective characters.
-  static String parse(String string) {
+  static String decode(String string) {
     assert(string != null);
 
     int charCodeIndex = 0;
 
     Match findNextCharCode() {
-      final Iterable<Match> charCodes = RegExp(r'&(#?)([a-zA-Z0-9]+?);').allMatches(string);
+      final Iterable<Match> charCodes =
+          RegExp(r'&(#?)([a-zA-Z0-9]+?);').allMatches(string);
 
       if (charCodes.length <= charCodeIndex) return null;
 
@@ -21,10 +24,12 @@ class HtmlCharacterEntities {
     Match nextCharCode = findNextCharCode();
 
     while (nextCharCode != null) {
-      final String charCode = string.substring(nextCharCode.start, nextCharCode.end);
+      final String charCode =
+          string.substring(nextCharCode.start, nextCharCode.end);
 
       if (characters.containsKey(charCode)) {
-        string = string.replaceRange(nextCharCode.start, nextCharCode.end, characters[charCode]);
+        string = string.replaceRange(
+            nextCharCode.start, nextCharCode.end, characters[charCode]);
       } else {
         charCodeIndex++;
       }
@@ -33,6 +38,94 @@ class HtmlCharacterEntities {
     }
 
     return string;
+  }
+
+  /// Parses a [string] and replaces every character included in the
+  /// [characters] string with their corresponding character entity.
+  ///
+  /// [characters] defaults to the 5 characters reserved in both HTML
+  /// and XML: less-than (`<`), greater-than (`>`), ampersand (`&`),
+  /// apostrophe or single quote (`'`), and double-quote (`"`).
+  ///
+  /// If [characters] is `null`, every single character included in
+  /// the characters map will be encoded if found in [string].
+  ///
+  /// If [defaultToAsciiCode] is `true`, the ASCII number will be
+  /// used to encode the character, if one exists, otherwise the
+  /// alphabetical character code will be used.
+  static String encode(
+    String string, {
+    String characters = '&<>"\'',
+    bool defaultToAsciiCode = false,
+  }) {
+    assert(string != null);
+    assert(defaultToAsciiCode != null);
+
+    final Map<String, String> encodingMap = Map<String, String>();
+
+    final List<String> encodingCharacters = characters?.split('') ??
+        HtmlCharacterEntities.characters.values.toList();
+
+    for (int i = 0; i < encodingCharacters.length; i++) {
+      final String character = encodingCharacters[i];
+
+      if (encodingMap.containsKey(character)) continue;
+
+      final bool hasAsciiCode = asciiCodes.containsKey(character);
+      final bool hasCharacterEntity = entities.containsKey(character);
+
+      if (!hasAsciiCode && !hasCharacterEntity) continue;
+
+      String characterEntity;
+
+      if (hasAsciiCode && hasCharacterEntity) {
+        if (defaultToAsciiCode) {
+          characterEntity = asciiCodes[character];
+        } else {
+          characterEntity = entities[character];
+        }
+      }
+
+      characterEntity ??=
+          (hasAsciiCode) ? asciiCodes[character] : entities[character];
+
+      encodingMap.addAll({
+        character: characterEntity,
+      });
+    }
+
+    final List<String> encodedCharacters = string.split('');
+
+    final List<String> encodingMapCharacters = encodingMap.keys.toList();
+
+    for (int i = 0; i < encodingMapCharacters.length; i++) {
+      final String character = encodingMapCharacters[i];
+
+      while (encodedCharacters.indexOf(character) != -1) {
+        encodedCharacters[encodedCharacters.indexOf(character)] =
+            encodingMap[character];
+      }
+    }
+
+    return encodedCharacters.join();
+  }
+
+  /// DEPRECATED
+  ///
+  /// `parse` currently acts as a wrapper for the `decode` method and
+  ///  will be removed in a future release.
+  ///
+  /// Please change all references to `HtmlCharacterEntities.parse`
+  /// in your code to `HtmlCharacterEntities.decode`.
+  static String parse(String string) {
+    assert(string != null);
+
+    print('''\n[HtmlCharacterEntities] Warning:
+  `HtmlCharacterEntities.parse()` has been deprecated in favor of `HtmlCharacterEntities.decode()`
+  and will be removed in a future release. Please change all references to `HtmlCharacterEntities.parse`
+  to `HtmlCharacterEntities.decode`.\n''');
+
+    return decode(string);
   }
 
   /// A map of all HTML 4.01 character entities and their corresponding characters.
@@ -687,7 +780,7 @@ class HtmlCharacterEntities {
     // dagger, obelisk
     '&#8224;': '†',
     '&dagger;': '†',
-    // double dagger, double obelisk
+    // double dagger (double obelisk)
     '&#8225;': '‡',
     '&Dagger;': '‡',
     // bullet (black small circle)
@@ -847,5 +940,944 @@ class HtmlCharacterEntities {
     '&hearts;': '♥',
     // black diamond suit
     '&diams;': '♦',
+  };
+
+  /// A map of all symbols with their corresponding non-ASCII code
+  /// charcter entities.
+  ///
+  /// __Note:__ The following characters were left out of this map as
+  /// values, as they do not have actual character representations:
+  /// zero-width non-joiner (`&zwnj;`), zero-width joiner (`&zwj;`),
+  ///  left-to-right mark (`&lrm;`), and right-to-left mark (`&rlm;`).
+  static const Map<String, String> entities = <String, String>{
+    // double quote
+    '"': '&quot;',
+    // ampersand
+    '&': '&amp;',
+    // apostrophe (single quote)
+    '\'': '&apos;',
+    // less-than
+    '<': '&lt;',
+    // greater-than
+    '>': '&gt;',
+    // non-breaking space
+    ' ': '&nbsp;',
+    // inverted exclamation mark
+    '¡': '&iexcl;',
+    // cent sign
+    '¢': '&cent;',
+    // pound sign
+    '£': '&pound;',
+    // currency sign
+    '¤': '&curren;',
+    // yen sign (yuan sign)
+    '¥': '&yen;',
+    // broken bar (broken vertical bar)
+    '¦': '&brvbar;',
+    // section sign
+    '§': '&sect;',
+    // diaeresis (spacing diaeresis)
+    '¨': '&uml;',
+    // copyright symbol
+    '©': '&copy;',
+    // feminine ordinal indicator
+    'ª': '&ordf;',
+    // left-pointing double angle quotation mark (left pointing guillemet)
+    '«': '&laquo;',
+    // not sign
+    '¬': '&not;',
+    // registered sign (registered trademark symbol)
+    '®': '&reg;',
+    // macron (spacing macron, overline, APL overbar)
+    '¯': '&macr;',
+    // degree symbol
+    '°': '&deg;',
+    // plus-minus sign (plus-or-minus sign)
+    '±': '&plusmn;',
+    // superscript two (superscript digit two, squared)
+    '²': '&sup2;',
+    // superscript three (superscript digit three, cubed)
+    '³': '&sup3;',
+    // acute accent (spacing acute)
+    '´': '&acute;',
+    // micro sign
+    'µ': '&micro;',
+    // pilcrow sign (paragraph sign)
+    '¶': '&para;',
+    // middle dot (Georgian comma, Greek middle dot)
+    '·': '&middot;',
+    // cedilla (spacing cedilla)
+    '¸': '&cedil;',
+    // superscript one (superscript digit one)
+    '¹': '&sup1;',
+    // masculine ordinal indicator
+    'º': '&ordm;',
+    // right-pointing double angle quotation mark (right pointing guillemet)
+    '»': '&raquo;',
+    // vulgar fraction one quarter (fraction one quarter)
+    '¼': '&frac14;',
+    // vulgar fraction one half (fraction one half)
+    '½': '&frac12;',
+    // vulgar fraction three quarters (fraction three quarters)
+    '¾': '&frac34;',
+    // inverted question mark (turned question mark)
+    '¿': '&iquest;',
+    // Latin capital letter A with grave accent (Latin capital letter A grave)
+    'À': '&Agrave;',
+    // Latin capital letter A with acute accent
+    'Á': '&Aacute;',
+    // Latin capital letter A with circumflex
+    'Â': '&Acirc;',
+    // Latin capital letter A with tilde
+    'Ã': '&Atilde;',
+    // Latin capital letter A with diaeresis
+    'Ä': '&Auml;',
+    // Latin capital letter A with ring above (Latin capital letter A ring)
+    'Å': '&Aring;',
+    // Latin capital letter AE (Latin capital ligature AE)
+    'Æ': '&AElig;',
+    // Latin capital letter C with cedilla
+    'Ç': '&Ccedil;',
+    // Latin capital letter E with grave accent
+    'È': '&Egrave;',
+    // Latin capital letter E with acute accent
+    'É': '&Eacute;',
+    // Latin capital letter E with circumflex
+    'Ê': '&Ecirc;',
+    // Latin capital letter E with diaeresis
+    'Ë': '&Euml;',
+    // Latin capital letter I with grave accent
+    'Ì': '&Igrave;',
+    // Latin capital letter I with acute accent
+    'Í': '&Iacute;',
+    // Latin capital letter I with circumflex
+    'Î': '&Icirc;',
+    // Latin capital letter I with diaeresis
+    'Ï': '&Iuml;',
+    // Latin capital letter Eth
+    'Ð': '&ETH;',
+    // Latin capital letter N with tilde
+    'Ñ': '&Ntilde;',
+    // Latin capital letter O with grave accent
+    'Ò': '&Ograve;',
+    // Latin capital letter O with acute accent
+    'Ó': '&Oacute;',
+    // Latin capital letter O with circumflex
+    'Ô': '&Ocirc;',
+    // Latin capital letter O with tilde
+    'Õ': '&Otilde;',
+    // Latin capital letter O with diaeresis
+    'Ö': '&Ouml;',
+    // multiplication sign
+    '×': '&times;',
+    // Latin capital letter O with stroke (Latin capital letter O slash)
+    'Ø': '&Oslash;',
+    // Latin capital letter U with grave accent
+    'Ù': '&Ugrave;',
+    // Latin capital letter U with acute accent
+    'Ú': '&Uacute;',
+    // Latin capital letter U with circumflex
+    'Û': '&Ucirc;',
+    // Latin capital letter U with diaeresis
+    'Ü': '&Uuml;',
+    // Latin capital letter Y with acute accent
+    'Ý': '&Yacute;',
+    // Latin capital letter THORN
+    'Þ': '&THORN;',
+    // Latin small letter sharp s (ess-zed); see German Eszett
+    'ß': '&szlig;',
+    // Latin small letter a with grave accent
+    'à': '&agrave;',
+    // Latin small letter a with acute accent
+    'á': '&aacute;',
+    // Latin small letter a with circumflex
+    'â': '&acirc;',
+    // Latin small letter a with tilde
+    'ã': '&atilde;',
+    // Latin small letter a with diaeresis
+    'ä': '&auml;',
+    // Latin small letter a with ring above
+    'å': '&aring;',
+    // Latin small letter ae (Latin small ligature ae)
+    'æ': '&aelig;',
+    // Latin small letter c with cedilla
+    'ç': '&ccedil;',
+    // Latin small letter e with grave accent
+    'è': '&egrave;',
+    // Latin small letter e with acute accent
+    'é': '&eacute;',
+    // Latin small letter e with circumflex
+    'ê': '&ecirc;',
+    // Latin small letter e with diaeresis
+    'ë': '&euml;',
+    // Latin small letter i with grave accent
+    'ì': '&igrave;',
+    // Latin small letter i with acute accent
+    'í': '&iacute;',
+    // Latin small letter i with circumflex
+    'î': '&icirc;',
+    // Latin small letter i with diaeresis
+    'ï': '&iuml;',
+    // Latin small letter eth
+    'ð': '&eth;',
+    // Latin small letter n with tilde
+    'ñ': '&ntilde;',
+    // Latin small letter o with grave accent
+    'ò': '&ograve;',
+    // Latin small letter o with acute accent
+    'ó': '&oacute;',
+    // Latin small letter o with circumflex
+    'ô': '&ocirc;',
+    // Latin small letter o with tilde
+    'õ': '&otilde;',
+    // Latin small letter o with diaeresis
+    'ö': '&ouml;',
+    // division sign (obelus)
+    '÷': '&divide;',
+    // Latin small letter o with stroke (Latin small letter o slash)
+    'ø': '&oslash;',
+    // Latin small letter u with grave accent
+    'ù': '&ugrave;',
+    // Latin small letter u with acute accent
+    'ú': '&uacute;',
+    // Latin small letter u with circumflex
+    'û': '&ucirc;',
+    // Latin small letter u with diaeresis
+    'ü': '&uuml;',
+    // Latin small letter y with acute accent
+    'ý': '&yacute;',
+    // Latin small letter thorn
+    'þ': '&thorn;',
+    // Latin small letter y with diaeresis
+    'ÿ': '&yuml;',
+    // Latin capital ligature oe
+    'Œ': '&OElig;',
+    // Latin small ligature oe
+    'œ': '&oelig;',
+    // Latin capital letter s with caron
+    'Š': '&Scaron;',
+    // Latin small letter s with caron
+    'š': '&scaron;',
+    // Latin capital letter y with diaeresis
+    'Ÿ': '&Yuml;',
+    // Latin small letter f with hook (function, florin)
+    'ƒ': '&fnof;',
+    // modifier letter circumflex accent
+    'ˆ': '&circ;',
+    // small tilde
+    '˜': '&tilde;',
+    // Greek capital letter Alpha
+    'Α': '&Alpha;',
+    // Greek capital letter Beta
+    'Β': '&Beta;',
+    // Greek capital letter Gamma
+    'Γ': '&Gamma;',
+    // Greek capital letter Delta
+    'Δ': '&Delta;',
+    // Greek capital letter Epsilon
+    'Ε': '&Epsilon;',
+    // Greek capital letter Zeta
+    'Ζ': '&Zeta;',
+    // Greek capital letter Eta
+    'Η': '&Eta;',
+    // Greek capital letter Theta
+    'Θ': '&Theta;',
+    // Greek capital letter Iota
+    'Ι': '&Iota;',
+    // Greek capital letter Kappa
+    'Κ': '&Kappa;',
+    // Greek capital letter Lambda
+    'Λ': '&Lambda;',
+    // Greek capital letter Mu
+    'Μ': '&Mu;',
+    // Greek capital letter Nu
+    'Ν': '&Nu;',
+    // Greek capital letter Xi
+    'Ξ': '&Xi;',
+    // Greek capital letter Omicron
+    'Ο': '&Omicron;',
+    // Greek capital letter Pi
+    'Π': '&Pi;',
+    // Greek capital letter Rho
+    'Ρ': '&Rho;',
+    // Greek capital letter Sigma
+    'Σ': '&Sigma;',
+    // Greek capital letter Tau
+    'Τ': '&Tau;',
+    // Greek capital letter Upsilon
+    'Υ': '&Upsilon;',
+    // Greek capital letter Phi
+    'Φ': '&Phi;',
+    // Greek capital letter Chi
+    'Χ': '&Chi;',
+    // Greek capital letter Psi
+    'Ψ': '&Psi;',
+    // Greek capital letter Omega
+    'Ω': '&Omega;',
+    // Greek small letter alpha
+    'α': '&alpha;',
+    // Greek small letter beta
+    'β': '&beta;',
+    // Greek small letter gamma
+    'γ': '&gamma;',
+    // Greek small letter delta
+    'δ': '&delta;',
+    // Greek small letter epsilon
+    'ε': '&epsilon;',
+    // Greek small letter zeta
+    'ζ': '&zeta;',
+    // Greek small letter eta
+    'η': '&eta;',
+    // Greek small letter theta
+    'θ': '&theta;',
+    // Greek small letter iota
+    'ι': '&iota;',
+    // Greek small letter kappa
+    'κ': '&kappa;',
+    // Greek small letter lambda
+    'λ': '&lambda;',
+    // Greek small letter mu
+    'μ': '&mu;',
+    // Greek small letter nu
+    'ν': '&nu;',
+    // Greek small letter xi
+    'ξ': '&xi;',
+    // Greek small letter omicron
+    'ο': '&omicron;',
+    // Greek small letter pi
+    'π': '&pi;',
+    // Greek small letter rho
+    'ρ': '&rho;',
+    // Greek small letter final sigma
+    'ς': '&sigmaf;',
+    // Greek small letter sigma
+    'σ': '&sigma;',
+    // Greek small letter tau
+    'τ': '&tau;',
+    // Greek small letter upsilon
+    'υ': '&upsilon;',
+    // Greek small letter phi
+    'φ': '&phi;',
+    // Greek small letter chi
+    'χ': '&chi;',
+    // Greek small letter psi
+    'ψ': '&psi;',
+    // Greek small letter omega
+    'ω': '&omega;',
+    // Greek theta symbol
+    'ϑ': '&thetasym;',
+    // Greek Upsilon with hook symbol
+    'ϒ': '&upsih;',
+    // Greek pi symbol
+    'ϖ': '&piv;',
+    // en space
+    ' ': '&ensp;',
+    // em space
+    ' ': '&emsp;',
+    // thin space
+    ' ': '&thinsp;',
+    // en dash
+    '–': '&ndash;',
+    // em dash
+    '—': '&mdash;',
+    // left single quotation mark
+    '‘': '&lsquo;',
+    // right single quotation mark
+    '’': '&rsquo;',
+    // single low-9 quotation mark
+    '‚': '&sbquo;',
+    // left double quotation mark
+    '“': '&ldquo;',
+    // right double quotation mark
+    '”': '&rdquo;',
+    // double low-9 quotation mark
+    '„': '&bdquo;',
+    // dagger, obelisk
+    '†': '&dagger;',
+    // double dagger (double obelisk)
+    '‡': '&Dagger;',
+    // bullet (black small circle)
+    '•': '&bull;',
+    // horizontal ellipsis (three dot leader)
+    '…': '&hellip;',
+    // per mille sign
+    '‰': '&permil;',
+    // prime (minutes, feet)
+    '′': '&prime;',
+    // double prime (seconds, inches)
+    '″': '&Prime;',
+    // single left-pointing angle quotation mark
+    '‹': '&lsaquo;',
+    // single right-pointing angle quotation mark
+    '›': '&rsaquo;',
+    // overline (spacing overscore)
+    '‾': '&oline;',
+    // fraction slash (solidus)
+    '⁄': '&frasl;',
+    // euro sign
+    '€': '&euro;',
+    // black-letter capital I (imaginary part)
+    'ℑ': '&image;',
+    // script capital P (power set, Weierstrass p)
+    '℘': '&weierp;',
+    // black-letter capital R (real part symbol)
+    'ℜ': '&real;',
+    // trademark symbol
+    '™': '&trade;',
+    // alef symbol (first transfinite cardinal)
+    'ℵ': '&alefsym;',
+    // leftwards arrow
+    '←': '&larr;',
+    // upwards arrow
+    '↑': '&uarr;',
+    // rightwards arrow
+    '→': '&rarr;',
+    // downwards arrow
+    '↓': '&darr;',
+    // left right arrow
+    '↔': '&harr;',
+    // downwards arrow with corner leftwards (carriage return)
+    '↵': '&crarr;',
+    // leftwards double arrow
+    '⇐': '&lArr;',
+    // upwards double arrow
+    '⇑': '&uArr;',
+    // rightwards double arrow
+    '⇒': '&rArr;',
+    // downwards double arrow
+    '⇓': '&dArr;',
+    // left right double arrow
+    '⇔': '&hArr;',
+    // for all
+    '∀': '&forall;',
+    // partial differential
+    '∂': '&part;',
+    // there exists
+    '∃': '&exist;',
+    // empty set (null set)
+    '∅': '&empty;',
+    // del or nabla (vector differential operator)
+    '∇': '&nabla;',
+    // element of
+    '∈': '&isin;',
+    // not an element of
+    '∉': '&notin;',
+    // contains as member
+    '∋': '&ni;',
+    // n-ary product (product sign)
+    '∏': '&prod;',
+    // n-ary summation
+    '∑': '&sum;',
+    // minus sign
+    '−': '&minus;',
+    // asterisk operator
+    '∗': '&lowast;',
+    // square root (radical sign)
+    '√': '&radic;',
+    // proportional to
+    '∝': '&prop;',
+    // infinity
+    '∞': '&infin;',
+    // angle
+    '∠': '&ang;',
+    // logical and (wedge)
+    '∧': '&and;',
+    // logical or (vee)
+    '∨': '&or;',
+    // intersection (cap)
+    '∩': '&cap;',
+    // union (cup)
+    '∪': '&cup;',
+    // integral
+    '∫': '&int;',
+    // therefore sign
+    '∴': '&there4;',
+    // tilde operator (varies with, similar to)
+    '∼': '&sim;',
+    // congruent to
+    '≅': '&cong;',
+    // almost equal to (asymptotic to)
+    '≈': '&asymp;',
+    // not equal to
+    '≠': '&ne;',
+    // identical to; sometimes used for 'equivalent to'
+    '≡': '&equiv;',
+    // less-than or equal to
+    '≤': '&le;',
+    // greater-than or equal to
+    '≥': '&ge;',
+    // subset of
+    '⊂': '&sub;',
+    // superset of
+    '⊃': '&sup;',
+    // not a subset of
+    '⊄': '&nsub;',
+    // subset of or equal to
+    '⊆': '&sube;',
+    // superset of or equal to
+    '⊇': '&supe;',
+    // circled plus (direct sum)
+    '⊕': '&oplus;',
+    // circled times (vector product)
+    '⊗': '&otimes;',
+    // up tack (orthogonal to, perpendicular)
+    '⊥': '&perp;',
+    // dot operator
+    '⋅': '&sdot;',
+    // vertical ellipsis
+    '⋮': '&vellip;',
+    // left ceiling (APL upstile)
+    '⌈': '&lceil;',
+    // right ceiling
+    '⌉': '&rceil;',
+    // left floor (APL downstile)
+    '⌊': '&lfloor;',
+    // right floor
+    '⌋': '&rfloor;',
+    // left-pointing angle bracket (bra)
+    '〈': '&lang;',
+    // right-pointing angle bracket (ket)
+    '〉': '&rang;',
+    // lozenge
+    '◊': '&loz;',
+    // black spade suit
+    '♠': '&spades;',
+    // black club suit (shamrock)
+    '♣': '&clubs;',
+    // black heart suit (valentine)
+    '♥': '&hearts;',
+    // black diamond suit
+    '♦': '&diams;',
+  };
+
+  /// A map of all symbols with an ASCII code character entity.
+  ///
+  /// __Note:__ The space character (` `) will return a non-breaking
+  /// space (`&#160;`). As such, the space character code `&#32;` does
+  /// not exist as a value in this map.
+  ///
+  /// The soft hyphen character code (`&#173;`) is also left out of this
+  /// map, as it doesn't have an actual character representation.
+  static const Map<String, String> asciiCodes = <String, String>{
+    // exclamation mark
+    '!': '&#33;',
+    // double quote
+    '"': '&#34;',
+    // number sign
+    '#': '&#35;',
+    // dollar sign
+    '\$': '&#36;',
+    // percent sign
+    '%': '&#37;',
+    // ampersand
+    '&': '&#38;',
+    // apostrophe (single quote)
+    '\'': '&#39;',
+    // opening parenthesis
+    '(': '&#40;',
+    // closing parenthesis
+    ')': '&#41;',
+    // asterisk
+    '*': '&#42;',
+    // plus sign
+    '+': '&#43;',
+    // comma
+    ',': '&#44;',
+    // minus sign (hyphen)
+    '-': '&#45;',
+    // period
+    '.': '&#46;',
+    // slash
+    '/': '&#47;',
+    // zero
+    '0': '&#48;',
+    // one
+    '1': '&#49;',
+    // two
+    '2': '&#50;',
+    // three
+    '3': '&#51;',
+    // four
+    '4': '&#52;',
+    // five
+    '5': '&#53;',
+    // six
+    '6': '&#54;',
+    // seven
+    '7': '&#55;',
+    // eight
+    '8': '&#56;',
+    // nine
+    '9': '&#57;',
+    // colon
+    ':': '&#58;',
+    // semicolon
+    ';': '&#59;',
+    // less-than
+    '<': '&#60;',
+    // equal sign
+    '=': '&#61;',
+    // greater-than
+    '>': '&#62;',
+    // question mark
+    '?': '&#63;',
+    // at symbol
+    '@': '&#64;',
+    // uppercase a
+    'A': '&#65;',
+    // uppercase b
+    'B': '&#66;',
+    // uppercase c
+    'C': '&#67;',
+    // uppercase d
+    'D': '&#68;',
+    // uppercase e
+    'E': '&#69;',
+    // uppercase f
+    'F': '&#70;',
+    // uppercase g
+    'G': '&#71;',
+    // uppercase h
+    'H': '&#72;',
+    // uppercase i
+    'I': '&#73;',
+    // uppercase j
+    'J': '&#74;',
+    // uppercase k
+    'K': '&#75;',
+    // uppercase l
+    'L': '&#76;',
+    // uppercase m
+    'M': '&#77;',
+    // uppercase n
+    'N': '&#78;',
+    // uppercase o
+    'O': '&#79;',
+    // uppercase p
+    'P': '&#80;',
+    // uppercase q
+    'Q': '&#81;',
+    // uppercase r
+    'R': '&#82;',
+    // uppercase s
+    'S': '&#83;',
+    // uppercase t
+    'T': '&#84;',
+    // uppercase u
+    'U': '&#85;',
+    // uppercase v
+    'V': '&#86;',
+    // uppercase w
+    'W': '&#87;',
+    // uppercase x
+    'X': '&#88;',
+    // uppercase y
+    'Y': '&#89;',
+    // uppercase z
+    'Z': '&#90;',
+    // opening bracket
+    '[': '&#91;',
+    // backslash
+    '\\': '&#92;',
+    // closing bracket
+    ']': '&#93;',
+    // caret (circumflex)
+    '^': '&#94;',
+    // underscore
+    '_': '&#95;',
+    // grave accent
+    '`': '&#96;',
+    // lowercase a
+    'a': '&#97;',
+    // lowercase b
+    'b': '&#98;',
+    // lowercase c
+    'c': '&#99;',
+    // lowercase d
+    'd': '&#100;',
+    // lowercase e
+    'e': '&#101;',
+    // lowercase f
+    'f': '&#102;',
+    // lowercase g
+    'g': '&#103;',
+    // lowercase h
+    'h': '&#104;',
+    // lowercase i
+    'i': '&#105;',
+    // lowercase j
+    'j': '&#106;',
+    // lowercase k
+    'k': '&#107;',
+    // lowercase l
+    'l': '&#108;',
+    // lowercase m
+    'm': '&#109;',
+    // lowercase n
+    'n': '&#110;',
+    // lowercase o
+    'o': '&#111;',
+    // lowercase p
+    'p': '&#112;',
+    // lowercase q
+    'q': '&#113;',
+    // lowercase r
+    'r': '&#114;',
+    // lowercase s
+    's': '&#115;',
+    // lowercase t
+    't': '&#116;',
+    // lowercase u
+    'u': '&#117;',
+    // lowercase v
+    'v': '&#118;',
+    // lowercase w
+    'w': '&#119;',
+    // lowercase x
+    'x': '&#120;',
+    // lowercase y
+    'y': '&#121;',
+    // lowercase z
+    'z': '&#122;',
+    // opening brace
+    '{': '&#123;',
+    // vertical bar
+    '|': '&#124;',
+    // closing brace
+    '}': '&#125;',
+    // equivalency sign (tilde)
+    '~': '&#126;',
+    // non-breaking space
+    ' ': '&#160;',
+    // inverted exclamation mark
+    '¡': '&#161;',
+    // cent sign
+    '¢': '&#162;',
+    // pound sign
+    '£': '&#163;',
+    // currency sign
+    '¤': '&#164;',
+    // yen sign (yuan sign)
+    '¥': '&#165;',
+    // broken bar (broken vertical bar)
+    '¦': '&#166;',
+    // section sign
+    '§': '&#167;',
+    // diaeresis (spacing diaeresis)
+    '¨': '&#168;',
+    // copyright symbol
+    '©': '&#169;',
+    // feminine ordinal indicator
+    'ª': '&#170;',
+    // left-pointing double angle quotation mark (left pointing guillemet)
+    '«': '&#171;',
+    // not sign
+    '¬': '&#172;',
+    // registered sign (registered trademark symbol)
+    '®': '&#174;',
+    // macron (spacing macron, overline, APL overbar)
+    '¯': '&#175;',
+    // degree symbol
+    '°': '&#176;',
+    // plus-minus sign (plus-or-minus sign)
+    '±': '&#177;',
+    // superscript two (superscript digit two, squared)
+    '²': '&#178;',
+    // superscript three (superscript digit three, cubed)
+    '³': '&#179;',
+    // acute accent (spacing acute)
+    '´': '&#180;',
+    // micro sign
+    'µ': '&#181;',
+    // pilcrow sign (paragraph sign)
+    '¶': '&#182;',
+    // middle dot (Georgian comma, Greek middle dot)
+    '·': '&#183;',
+    // cedilla (spacing cedilla)
+    '¸': '&#184;',
+    // superscript one (superscript digit one)
+    '¹': '&#185;',
+    // masculine ordinal indicator
+    'º': '&#186;',
+    // right-pointing double angle quotation mark (right pointing guillemet)
+    '»': '&#187;',
+    // vulgar fraction one quarter (fraction one quarter)
+    '¼': '&#188;',
+    // vulgar fraction one half (fraction one half)
+    '½': '&#189;',
+    // vulgar fraction three quarters (fraction three quarters)
+    '¾': '&#190;',
+    // inverted question mark (turned question mark)
+    '¿': '&#191;',
+    // Latin capital letter A with grave accent (Latin capital letter A grave)
+    'À': '&#192;',
+    // Latin capital letter A with acute accent
+    'Á': '&#193;',
+    // Latin capital letter A with circumflex
+    'Â': '&#194;',
+    // Latin capital letter A with tilde
+    'Ã': '&#195;',
+    // Latin capital letter A with diaeresis
+    'Ä': '&#196;',
+    // Latin capital letter A with ring above (Latin capital letter A ring)
+    'Å': '&#197;',
+    // Latin capital letter AE (Latin capital ligature AE)
+    'Æ': '&#198;',
+    // Latin capital letter C with cedilla
+    'Ç': '&#199;',
+    // Latin capital letter E with grave accent
+    'È': '&#200;',
+    // Latin capital letter E with acute accent
+    'É': '&#201;',
+    // Latin capital letter E with circumflex
+    'Ê': '&#202;',
+    // Latin capital letter E with diaeresis
+    'Ë': '&#203;',
+    // Latin capital letter I with grave accent
+    'Ì': '&#204;',
+    // Latin capital letter I with acute accent
+    'Í': '&#205;',
+    // Latin capital letter I with circumflex
+    'Î': '&#206;',
+    // Latin capital letter I with diaeresis
+    'Ï': '&#207;',
+    // Latin capital letter Eth
+    'Ð': '&#208;',
+    // Latin capital letter N with tilde
+    'Ñ': '&#209;',
+    // Latin capital letter O with grave accent
+    'Ò': '&#210;',
+    // Latin capital letter O with acute accent
+    'Ó': '&#211;',
+    // Latin capital letter O with circumflex
+    'Ô': '&#212;',
+    // Latin capital letter O with tilde
+    'Õ': '&#213;',
+    // Latin capital letter O with diaeresis
+    'Ö': '&#214;',
+    // multiplication sign
+    '×': '&#215;',
+    // Latin capital letter O with stroke (Latin capital letter O slash)
+    'Ø': '&#216;',
+    // Latin capital letter U with grave accent
+    'Ù': '&#217;',
+    // Latin capital letter U with acute accent
+    'Ú': '&#218;',
+    // Latin capital letter U with circumflex
+    'Û': '&#219;',
+    // Latin capital letter U with diaeresis
+    'Ü': '&#220;',
+    // Latin capital letter Y with acute accent
+    'Ý': '&#221;',
+    // Latin capital letter THORN
+    'Þ': '&#222;',
+    // Latin small letter sharp s (ess-zed); see German Eszett
+    'ß': '&#223;',
+    // Latin small letter a with grave accent
+    'à': '&#224;',
+    // Latin small letter a with acute accent
+    'á': '&#225;',
+    // Latin small letter a with circumflex
+    'â': '&#226;',
+    // Latin small letter a with tilde
+    'ã': '&#227;',
+    // Latin small letter a with diaeresis
+    'ä': '&#228;',
+    // Latin small letter a with ring above
+    'å': '&#229;',
+    // Latin small letter ae (Latin small ligature ae)
+    'æ': '&#230;',
+    // Latin small letter c with cedilla
+    'ç': '&#231;',
+    // Latin small letter e with grave accent
+    'è': '&#232;',
+    // Latin small letter e with acute accent
+    'é': '&#233;',
+    // Latin small letter e with circumflex
+    'ê': '&#234;',
+    // Latin small letter e with diaeresis
+    'ë': '&#235;',
+    // Latin small letter i with grave accent
+    'ì': '&#236;',
+    // Latin small letter i with acute accent
+    'í': '&#237;',
+    // Latin small letter i with circumflex
+    'î': '&#238;',
+    // Latin small letter i with diaeresis
+    'ï': '&#239;',
+    // Latin small letter eth
+    'ð': '&#240;',
+    // Latin small letter n with tilde
+    'ñ': '&#241;',
+    // Latin small letter o with grave accent
+    'ò': '&#242;',
+    // Latin small letter o with acute accent
+    'ó': '&#243;',
+    // Latin small letter o with circumflex
+    'ô': '&#244;',
+    // Latin small letter o with tilde
+    'õ': '&#245;',
+    // Latin small letter o with diaeresis
+    'ö': '&#246;',
+    // division sign (obelus)
+    '÷': '&#247;',
+    // Latin small letter o with stroke (Latin small letter o slash)
+    'ø': '&#248;',
+    // Latin small letter u with grave accent
+    'ù': '&#249;',
+    // Latin small letter u with acute accent
+    'ú': '&#250;',
+    // Latin small letter u with circumflex
+    'û': '&#251;',
+    // Latin small letter u with diaeresis
+    'ü': '&#252;',
+    // Latin small letter y with acute accent
+    'ý': '&#253;',
+    // Latin small letter thorn
+    'þ': '&#254;',
+    // Latin small letter y with diaeresis
+    'ÿ': '&#255;',
+    // Latin capital ligature oe
+    'Œ': '&#338;',
+    // Latin small ligature oe
+    'œ': '&#339;',
+    // Latin capital letter s with caron
+    'Š': '&#352;',
+    // Latin small letter s with caron
+    'š': '&#353;',
+    // Latin capital letter y with diaeresis
+    'Ÿ': '&#376;',
+    // Latin small letter f with hook (function, florin)
+    'ƒ': '&#402;',
+    // en dash
+    '–': '&#8211;',
+    // em dash
+    '—': '&#8212;',
+    // left single quotation mark
+    '‘': '&#8216;',
+    // right single quotation mark
+    '’': '&#8217;',
+    // single low-9 quotation mark
+    '‚': '&#8218;',
+    // left double quotation mark
+    '“': '&#8220;',
+    // right double quotation mark
+    '”': '&#8221;',
+    // double low-9 quotation mark
+    '„': '&#8222;',
+    // dagger, obelisk
+    '†': '&#8224;',
+    // double dagger (double obelisk)
+    '‡': '&#8225;',
+    // bullet (black small circle)
+    '•': '&#8226;',
+    // horizontal ellipsis (three dot leader)
+    '…': '&#8230;',
+    // per mille sign
+    '‰': '&#8240;',
+    // euro sign
+    '€': '&#8364;',
+    // trademark symbol
+    '™': '&#8482;',
   };
 }

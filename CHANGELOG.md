@@ -1,11 +1,18 @@
-## [0.0.3] - July 7, 2019
+## [0.1.0] - August 1, 2019
 
-* Changed RegExpMatch type declarations to Match
+* Added the `characterEntities` statically typed map to [HtmlCharacterEntities].
 
-## [0.0.2] - July 7, 2019
+* Added the `encode` method to [HtmlCharacterEntities].
 
-* Commented the HtmlCharacterEntities class
+* Deprecated the `parse` method in favor of `decode`. `parse` still exists
+as a wrapper for `decode`, but will be removed in a future release.
 
-## [0.0.1] - July 7, 2019
+* Wrote new tests.
 
-* Initial release
+## [0.0.1 - 0.0.3] - July 7, 2019
+
+* Changed [RegExpMatch] type declarations to [Match].
+
+* Commented the [HtmlCharacterEntities] class.
+
+* Initial release.
