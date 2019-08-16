@@ -1,8 +1,8 @@
 # html_character_entities
 
 A Dart utility class containing maps of key/value pairs for every
-HTML 4.01 character entity, including ASCII codes, and methods to
-encode and decode strings to and from those character entities.
+HTML 4.01 character entity, including ASCII and hex codes, and methods
+to encode and decode strings to and from those character entities.
 
 # Usage
 
@@ -42,9 +42,13 @@ If [characters] is `null`, every character in the `HtmlCharacterEntities.charact
 
 ## Maps
 
-A map of every HTML character code, as well as their ASCII code entities,
-can be referenced from `HtmlCharacterEntities.characters`. It is used by
-the `decode` method.
+A map of every HTML 4.01 character code, as well as their ASCII and hex
+code entities can be referenced from `HtmlCharacterEntities.characters`.
+
+__Note:__ The hex codes in the map don't have leading 0s. I.e. the hex
+code `&#x0000a5;` is in the map as `&#xa5;`. When decoding hex code
+entities, the leading 0s will be removed by the parser before being
+looked up.
 
 ```dart
 Map<String, String> c = HtmlCharacterEntities.characters;

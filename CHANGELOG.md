@@ -1,3 +1,9 @@
+## [0.1.1] - August 16, 2019
+
+* Added support for hex code character entities.
+
+* Added missing ASCII codes for characters with HTML codes.
+
 ## [0.1.0] - August 1, 2019
 
 * Added the `characterEntities` statically typed map to [HtmlCharacterEntities].
