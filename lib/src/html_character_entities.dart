@@ -24,8 +24,12 @@ class HtmlCharacterEntities {
     while (nextCharCode != null) {
       String charCode = string.substring(nextCharCode.start, nextCharCode.end);
 
-      while (charCode.startsWith('&#x0')) {
-        charCode = charCode.replaceFirst('0', '');
+      if (charCode.startsWith('&#x')) {
+        while (charCode.startsWith('&#x0')) {
+          charCode = charCode.replaceFirst('0', '');
+        }
+
+        charCode = charCode.toLowerCase();
       }
 
       if (characters.containsKey(charCode)) {
