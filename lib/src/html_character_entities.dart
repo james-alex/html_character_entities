@@ -64,16 +64,23 @@ class HtmlCharacterEntities {
   /// alphabetical character code will be used.
   ///
   /// [defaultToAsciiCode] and [defaultToHexCode] must not both be `true`.
+  ///
+  /// If [checkAmpsForEntities] is `true`, when encoding [string] for
+  /// the `&` character, each `&` will be checked to see if it's part of
+  /// a character entity (`RegExp(r'&\S*;')`), and will not be encoded
+  /// if it is.
   static String encode(
     String string, {
     String characters = '&<>"\'',
     bool defaultToAsciiCode = false,
     bool defaultToHexCode = false,
+    bool checkAmpsForEntities = true,
   }) {
     assert(string != null);
     assert(defaultToAsciiCode != null);
     assert(defaultToHexCode != null);
     assert(!(defaultToAsciiCode && defaultToHexCode));
+    assert(checkAmpsForEntities != null);
 
     final Map<String, String> encodingMap = Map<String, String>();
 
@@ -114,6 +121,26 @@ class HtmlCharacterEntities {
     for (int i = 0; i < encodingMapCharacters.length; i++) {
       final String character = encodingMapCharacters[i];
 
+      if (character == '&' && checkAmpsForEntities) {
+        int ampIndex = 0;
+
+        while (true) {
+          ampIndex = encodingCharacters.indexOf('&', ampIndex);
+
+          if (ampIndex == -1) break;
+
+          final String stringAtAmp = string.substring(ampIndex);
+
+          if (!stringAtAmp.startsWith(RegExp(r'&\S*;'))) {
+            encodingCharacters[ampIndex] = encodingMap['&'];
+          }
+
+          ampIndex++;
+        }
+
+        continue;
+      }
+
       while (encodedCharacters.contains(character)) {
         encodedCharacters[encodedCharacters.indexOf(character)] =
             encodingMap[character];
@@ -125,11 +152,11 @@ class HtmlCharacterEntities {
 
   /// DEPRECATED
   ///
-  /// `parse` currently acts as a wrapper for the `decode` method and
+  /// [parse] currently acts as a wrapper for the [decode] method and
   ///  will be removed in a future release.
   ///
-  /// Please change all references to `HtmlCharacterEntities.parse`
-  /// in your codebase to `HtmlCharacterEntities.decode`.
+  /// Please change all references to [HtmlCharacterEntities.parse]
+  /// in your codebase to [HtmlCharacterEntities.decode].
   static String parse(String string) {
     assert(string != null);
 
