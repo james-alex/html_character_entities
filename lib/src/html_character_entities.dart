@@ -67,7 +67,7 @@ class HtmlCharacterEntities {
   ///
   /// If [checkAmpsForEntities] is `true`, when encoding [string] for
   /// the `&` character, each `&` will be checked to see if it's part of
-  /// a character entity (`RegExp(r'&\S*;')`), and will not be encoded
+  /// a character entity (`RegExp(r'&(#?)\w*;')`), and will not be encoded
   /// if it is.
   static String encode(
     String string, {
