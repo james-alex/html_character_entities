@@ -125,14 +125,14 @@ class HtmlCharacterEntities {
         int ampIndex = 0;
 
         while (true) {
-          ampIndex = encodingCharacters.indexOf('&', ampIndex);
+          ampIndex = encodedCharacters.indexOf('&', ampIndex);
 
           if (ampIndex == -1) break;
 
           final String stringAtAmp = string.substring(ampIndex);
 
-          if (!stringAtAmp.startsWith(RegExp(r'&\S*;'))) {
-            encodingCharacters[ampIndex] = encodingMap['&'];
+          if (!stringAtAmp.startsWith(RegExp(r'&(#?)\w*;'))) {
+            encodedCharacters[ampIndex] = encodingMap['&'];
           }
 
           ampIndex++;
