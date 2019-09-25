@@ -1,3 +1,7 @@
+## [0.1.2+1] - September 25, 2019
+
+* Strip leading 0s from numeric entities before lookup.
+
 ## [0.1.2] - August 22, 2019
 
 * Added the [checkAmpsForEntities] option to the [encode] method.

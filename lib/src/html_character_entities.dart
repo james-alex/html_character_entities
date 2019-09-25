@@ -24,8 +24,8 @@ class HtmlCharacterEntities {
     while (nextCharCode != null) {
       String charCode = string.substring(nextCharCode.start, nextCharCode.end);
 
-      if (charCode.startsWith('&#x')) {
-        while (charCode.startsWith('&#x0')) {
+      if (charCode.startsWith(RegExp(r'&#[x0]'))) {
+        while (charCode.startsWith(RegExp(r'&#x?0'))) {
           charCode = charCode.replaceFirst('0', '');
         }
 
