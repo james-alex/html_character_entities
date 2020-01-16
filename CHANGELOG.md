@@ -1,3 +1,7 @@
+## [0.1.2+2] - January 16, 2020
+
+* Formatting changes.
+
 ## [0.1.2+1] - September 25, 2019
 
 * Strip leading 0s from numeric entities before lookup.

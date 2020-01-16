@@ -4,11 +4,12 @@
 class HtmlCharacterEntities {
   HtmlCharacterEntities._();
 
-  /// Parses a [string] and replaces all valid HTML character entities with their respective characters.
+  /// Parses a [string] and replaces all valid HTML character
+  /// entities with their respective characters.
   static String decode(String string) {
     assert(string != null);
 
-    int charCodeIndex = 0;
+    var charCodeIndex = 0;
 
     Match findNextCharCode() {
       final Iterable<Match> charCodes =
@@ -19,10 +20,10 @@ class HtmlCharacterEntities {
       return charCodes.elementAt(charCodeIndex);
     }
 
-    Match nextCharCode = findNextCharCode();
+    var nextCharCode = findNextCharCode();
 
     while (nextCharCode != null) {
-      String charCode = string.substring(nextCharCode.start, nextCharCode.end);
+      var charCode = string.substring(nextCharCode.start, nextCharCode.end);
 
       if (charCode.startsWith(RegExp(r'&#[x0]'))) {
         while (charCode.startsWith(RegExp(r'&#x?0'))) {
@@ -82,20 +83,20 @@ class HtmlCharacterEntities {
     assert(!(defaultToAsciiCode && defaultToHexCode));
     assert(checkAmpsForEntities != null);
 
-    final Map<String, String> encodingMap = Map<String, String>();
+    final encodingMap = <String, String>{};
 
-    final List<String> encodingCharacters = characters?.split('') ??
+    final encodingCharacters = characters?.split('') ??
         HtmlCharacterEntities.characters.values.toList();
 
-    for (int i = 0; i < encodingCharacters.length; i++) {
-      final String character = encodingCharacters[i];
+    for (var i = 0; i < encodingCharacters.length; i++) {
+      final character = encodingCharacters[i];
 
       if (encodingMap.containsKey(character) ||
           (!HtmlCharacterEntities.characters.containsValue(character))) {
         continue;
       }
 
-      final bool hasCharacterEntity = entities.containsKey(character);
+      final hasCharacterEntity = entities.containsKey(character);
 
       String characterEntity;
 
@@ -114,22 +115,22 @@ class HtmlCharacterEntities {
       });
     }
 
-    final List<String> encodedCharacters = string.split('');
+    final encodedCharacters = string.split('');
 
-    final List<String> encodingMapCharacters = encodingMap.keys.toList();
+    final encodingMapCharacters = encodingMap.keys.toList();
 
-    for (int i = 0; i < encodingMapCharacters.length; i++) {
-      final String character = encodingMapCharacters[i];
+    for (var i = 0; i < encodingMapCharacters.length; i++) {
+      final character = encodingMapCharacters[i];
 
       if (character == '&' && checkAmpsForEntities) {
-        int ampIndex = 0;
+        var ampIndex = 0;
 
         while (true) {
           ampIndex = encodedCharacters.indexOf('&', ampIndex);
 
           if (ampIndex == -1) break;
 
-          final String stringAtAmp = string.substring(ampIndex);
+          final stringAtAmp = string.substring(ampIndex);
 
           if (!stringAtAmp.startsWith(RegExp(r'&(#?)\w*;'))) {
             encodedCharacters[ampIndex] = encodingMap['&'];
@@ -168,7 +169,8 @@ class HtmlCharacterEntities {
     return decode(string);
   }
 
-  /// A map of all HTML 4.01 character entities and their corresponding characters.
+  /// A map of all HTML 4.01 character entities
+  /// and their corresponding characters.
   static const Map<String, String> characters = <String, String>{
     // space
     '&#32;': ' ',
