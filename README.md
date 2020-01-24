@@ -1,5 +1,8 @@
 # html_character_entities
 
+[![pub package](https://img.shields.io/pub/v/html_character_entities.svg)](https://pub.dartlang.org/packages/html_character_entities)
+[![style: effective dart](https://img.shields.io/badge/style-effective_dart-40c4ff.svg)](https://github.com/tenhobi/effective_dart)
+
 A Dart utility class containing maps of key/value pairs for every
 HTML 4.01 character entity, including ASCII and hex codes, and methods
 to encode and decode strings to and from those character entities.
