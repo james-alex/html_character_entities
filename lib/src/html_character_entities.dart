@@ -151,24 +151,6 @@ class HtmlCharacterEntities {
     return encodedCharacters.join();
   }
 
-  /// DEPRECATED
-  ///
-  /// [parse] currently acts as a wrapper for the [decode] method and
-  ///  will be removed in a future release.
-  ///
-  /// Please change all references to [HtmlCharacterEntities.parse]
-  /// in your codebase to [HtmlCharacterEntities.decode].
-  static String parse(String string) {
-    assert(string != null);
-
-    print('''\n[HtmlCharacterEntities] Warning:
-  `HtmlCharacterEntities.parse()` has been deprecated in favor of `HtmlCharacterEntities.decode()`
-  and will be removed in a future release. Please change all references to `HtmlCharacterEntities.parse`
-  to `HtmlCharacterEntities.decode`.\n''');
-
-    return decode(string);
-  }
-
   /// A map of all HTML 4.01 character entities
   /// and their corresponding characters.
   static const Map<String, String> characters = <String, String>{
