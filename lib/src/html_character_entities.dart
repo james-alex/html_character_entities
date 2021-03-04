@@ -7,11 +7,9 @@ class HtmlCharacterEntities {
   /// Parses a [string] and replaces all valid HTML character
   /// entities with their respective characters.
   static String decode(String string) {
-    assert(string != null);
-
     var charCodeIndex = 0;
 
-    Match findNextCharCode() {
+    Match? findNextCharCode() {
       final Iterable<Match> charCodes =
           RegExp(r'&(#?)([a-zA-Z0-9]+?);').allMatches(string);
 
@@ -35,7 +33,7 @@ class HtmlCharacterEntities {
 
       if (characters.containsKey(charCode)) {
         string = string.replaceRange(
-            nextCharCode.start, nextCharCode.end, characters[charCode]);
+            nextCharCode.start, nextCharCode.end, characters[charCode]!);
       } else {
         charCodeIndex++;
       }
@@ -72,16 +70,12 @@ class HtmlCharacterEntities {
   /// if it is.
   static String encode(
     String string, {
-    String characters = '&<>"\'',
+    String? characters = '&<>"\'',
     bool defaultToAsciiCode = false,
     bool defaultToHexCode = false,
     bool checkAmpsForEntities = true,
   }) {
-    assert(string != null);
-    assert(defaultToAsciiCode != null);
-    assert(defaultToHexCode != null);
     assert(!(defaultToAsciiCode && defaultToHexCode));
-    assert(checkAmpsForEntities != null);
 
     final encodingMap = <String, String>{};
 
@@ -89,7 +83,8 @@ class HtmlCharacterEntities {
         HtmlCharacterEntities.characters.values.toSet();
 
     for (var i = 0; i < encodingCharacters.length; i++) {
-      final character = encodingCharacters[i];
+      final character = encodingCharacters.elementAt(i);
+      if (character.isEmpty) continue;
 
       final hasCharacterEntity = entities.containsKey(character);
 
@@ -97,12 +92,12 @@ class HtmlCharacterEntities {
 
       if (defaultToAsciiCode || defaultToHexCode || !hasCharacterEntity) {
         if (defaultToHexCode) {
-          characterEntity = hexCodes[character];
+          characterEntity = hexCodes[character]!;
         } else {
-          characterEntity = asciiCodes[character];
+          characterEntity = asciiCodes[character]!;
         }
       } else {
-        characterEntity = entities[character];
+        characterEntity = entities[character]!;
       }
 
       encodingMap.addAll({
@@ -128,7 +123,7 @@ class HtmlCharacterEntities {
           final stringAtAmp = string.substring(ampIndex);
 
           if (!stringAtAmp.startsWith(RegExp(r'&(#?)\w*;'))) {
-            encodedCharacters[ampIndex] = encodingMap['&'];
+            encodedCharacters[ampIndex] = encodingMap['&']!;
           }
 
           ampIndex++;
@@ -139,7 +134,7 @@ class HtmlCharacterEntities {
 
       while (encodedCharacters.contains(character)) {
         encodedCharacters[encodedCharacters.indexOf(character)] =
-            encodingMap[character];
+            encodingMap[character]!;
       }
     }
 

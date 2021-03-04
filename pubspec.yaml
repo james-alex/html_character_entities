@@ -3,12 +3,12 @@ description: >-
   A utility class containing maps of every HTML 4.01 character entity,
   including ASCII and hex codes, and methods to encode/decode strings
   with those character entities.
-version: 0.1.2+4
+version: 1.0.0
 homepage: https://github.com/james-alex/html_character_entities
 
 environment:
-  sdk: ">=2.0.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dev_dependencies:
-  test: ^1.6.5
   pedantic: ^1.11.0
+  test: ^1.16.5
