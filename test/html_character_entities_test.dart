@@ -3,11 +3,8 @@ import 'package:html_character_entities/html_character_entities.dart';
 
 void main() {
   const characters = HtmlCharacterEntities.characters;
-
   const entities = HtmlCharacterEntities.entities;
-
   const asciiCodes = HtmlCharacterEntities.asciiCodes;
-
   const hexCodes = HtmlCharacterEntities.hexCodes;
 
   const _exceptions = <String>[
