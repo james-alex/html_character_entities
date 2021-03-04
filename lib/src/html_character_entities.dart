@@ -86,15 +86,10 @@ class HtmlCharacterEntities {
     final encodingMap = <String, String>{};
 
     final encodingCharacters = characters?.split('') ??
-        HtmlCharacterEntities.characters.values.toList();
+        HtmlCharacterEntities.characters.values.toSet();
 
     for (var i = 0; i < encodingCharacters.length; i++) {
       final character = encodingCharacters[i];
-
-      if (encodingMap.containsKey(character) ||
-          (!HtmlCharacterEntities.characters.containsValue(character))) {
-        continue;
-      }
 
       final hasCharacterEntity = entities.containsKey(character);
 
